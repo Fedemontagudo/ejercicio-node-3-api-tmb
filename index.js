@@ -4,6 +4,7 @@ const chalk = require("chalk");
 const debug = require("debug")("mi-app:principal");
 const { program } = require("commander");
 const morgan = require("morgan");
+const fetch = require("node-fetch");
 
 program.option("-p, --puerto <puerto>", "Puerto para nuestro servidor");
 program.parse(process.argv);
@@ -30,27 +31,33 @@ server.on("error", err => {
 
 app.use(morgan("dev"));
 app.use(express.static("public"));
+
 app.get("/metro/lineas", (req, res, next) => {
-  res.json({
-    id: 2,
-    linea: "L2",
-    descripcion: "Descripción de la línea"
-  });
+  fetch(`${urlAPI}/?app_id=${appId}&app_key=${appKey}`)
+    .then(resp => resp.json())
+    .then(lineas => {
+      res.json(lineas.features.map(linea => ({
+        id: linea.properties.ID_LINIA,
+        linea: linea.properties.NOM_LINIA,
+        descripcion: linea.properties.DESC_LINIA
+      })));
+    });
 });
 app.get("/metro/lineas/L2", (req, res, next) => {
   res.json({
     linea: "L2",
     descripcion: "Descripción de la línea",
-    paradas: [
-      {
-        id: 1,
-        nombre: "Nombre parada"
-      },
-    ]
+    paradas: [{ id: 1, nombre: "Nombre parada" },]
   });
 });
-app.post("/", (req, res, next) => {
-  res.status(403).json({ error: true, mensaje: "Te pensabas que podías hackerme" });
+app.put("/*", (req, res, next) => {
+  res.status(403).json({ error: true, mensaje: "Te pensabas que podías hackearme" });
+});
+app.post("/*", (req, res, next) => {
+  res.status(403).json({ error: true, mensaje: "Te pensabas que podías hackearme" });
+});
+app.delete("/*", (req, res, next) => {
+  res.status(403).json({ error: true, mensaje: "Te pensabas que podías hackearme" });
 });
 app.use((req, res, next) => {
   res.status(404).json({ error: true, mensaje: "Recurso no encontrado" });
